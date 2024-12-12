@@ -11,6 +11,7 @@ import {
   TransactionBuilder,
   xdr,
 } from "stellar-sdk";
+import * as StellarSdk from 'stellar-sdk';
 import Image from "next/image";
 import {
   StellarWalletsKit,
@@ -18,43 +19,27 @@ import {
   allowAllModules,
   XBULL_ID,
   ISupportedWallet,
+  FREIGHTER_ID,
+  FreighterModule
 } from "@creit.tech/stellar-wallets-kit";
 import { LedgerModule } from '@creit.tech/stellar-wallets-kit/modules/ledger.module';
 import { FileUpload } from "@/components/file-upload";
 import axios from "axios";
 
+const horizonServer = new StellarSdk.Horizon.Server('https://horizon.stellar.org');
+
 const kit: StellarWalletsKit = new StellarWalletsKit({
   network: WalletNetwork.TESTNET,
-  selectedWalletId: XBULL_ID,
+  selectedWalletId: FREIGHTER_ID,
   modules: allowAllModules(),
-  // modules: [
-  //   new xBullModule(),
-  //   new FreighterModule(),
-  //   new AlbedoModule(),
-  //   new LedgerModule(),
-  // ],
 });
 
 export const CONTRACT_ID =
-  "CD2KNAY4TNURVKE5GJPGBV6EJTUKNZQTHHWFDFYCTL3TBXDDP7DAWNDN";
+  "CCWGOA3N4TQLAAAFQKCQGNAQGB5ML7I67OREIFKWZXCSSU7KQKHEZBUL";
 export const NETWORK_PASSPHRASE = Networks.TESTNET;
 export const SOROBAN_URL = "https://soroban-testnet.stellar.org:443";
 
 export default function Home() {
-
-  
-
-
-  const handleClick = async () => {
-    await kit.openModal({
-      onWalletSelected: async (option: ISupportedWallet) => {
-        kit.setWallet(option.id);
-        const { address } = await kit.getAddress();
-        // Do something else
-        setWalletAddress(address);
-      },
-    });
-  };
   const [walletAddress, setWalletAddress] = useState("");
   const [fileData, setFileData] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -62,356 +47,55 @@ export default function Home() {
   const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
   const isConnected = walletAddress !== "";
 
-  // const estimateTransactionFee = async () => {
-    //   if (!walletAddress || !fileData) {
-    //     setEstimatedFee(null);
-    //     return;
-    //   }
-  
-    //   try {
-    //     const server = new SorobanRpc.Server(SOROBAN_URL);
-    //     const account = await server.getAccount(walletAddress);
-  
-    //     const contract = new Contract(CONTRACT_ID);
-  
-    //     // Convert address to ScVal
-    //     const addressScVal = new Address(walletAddress).toScVal();
-  
-    //     // Estimate fee for uploading file hash to IPFS first
-    //     const formData = new FormData();
-    //     formData.append("file", fileData);
-  
-    //     const resFile = await axios({
-    //       method: "post",
-    //       url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-    //       data: formData,
-    //       headers: {
-    //         pinata_api_key: `227563abeb8fd7e92ea8`,
-    //         pinata_secret_api_key: `08505f77c805fce6437535d44c0f52dead21cc76ffbfebef1709950d2e613092`,
-    //         "Content-Type": "multipart/form-data",
-    //       },
-    //     });
-  
-    //     const imageHash = `${resFile.data.IpfsHash}`;
-  
-    //     // Convert imageHash to ScVal string
-    //     const imageHashScVal = xdr.ScVal.scvString(imageHash);
-  
-    //     // Build transaction to estimate fee
-    //     const tx = new TransactionBuilder(account, {
-    //       fee: BASE_FEE,
-    //       networkPassphrase: NETWORK_PASSPHRASE,
-    //     })
-    //       .addOperation(contract.call("mint", addressScVal, imageHashScVal))
-    //       .setTimeout(30)
-    //       .build();
-  
-    //     const preparedTx = await server.prepareTransaction(tx);
-    //     // The fee is typically in stroops (1/10000000 of a token)
-    //     const feeInXLM = (parseInt(preparedTx.fee) / 10000000).toFixed(4);
-    //     console.log(feeInXLM)
-    //     setEstimatedFee(feeInXLM);
-  
-    //   } catch (error) {
-    //     console.error("Fee estimation error:", error);
-    //     setEstimatedFee(null);
-    //   }
-    // };
-    
+  // Wallet Connection Handler
+  const handleClick = async () => {
+    await kit.openModal({
+      onWalletSelected: async (option: ISupportedWallet) => {
+        kit.setWallet(option.id);
+        const { address } = await kit.getAddress();
+        setWalletAddress(address);
+      },
+    });
+  };
 
+  // Transaction Fee Estimation Effect
   useEffect(() => {
-    
     const estimateTransactionFee = async () => {
-      if (!walletAddress || !fileData) {
-        setEstimatedFee(null);
-        return;
-      }
-    
       try {
-        const server = new SorobanRpc.Server(SOROBAN_URL);
-        const account = await server.getAccount(walletAddress);
-    
-        const contract = new Contract(CONTRACT_ID);
-    
-        // Convert address to ScVal
-        const addressScVal = new Address(walletAddress).toScVal();
-    
-        // Upload file to IPFS
-        const formData = new FormData();
-        formData.append("file", fileData);
-    
-        const resFile = await axios({
-          method: "post",
-          url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-          data: formData,
-          headers: {
-            pinata_api_key: `227563abeb8fd7e92ea8`,
-            pinata_secret_api_key: `08505f77c805fce6437535d44c0f52dead21cc76ffbfebef1709950d2e613092`,
-            "Content-Type": "multipart/form-data",
-          },
+        // Fetch fee statistics from Horizon server
+        const feeStats = await horizonServer.feeStats();
+        
+        // Choose a fee strategy (using mode/most common fee)
+        const baseFeeInStroops = feeStats.fee_charged.mode;
+        
+        // Convert stroops to XLM (1 XLM = 10,000,000 stroops)
+        const feeInXLM = (Number(baseFeeInStroops) / 10_000_000).toFixed(4);
+        
+        setEstimatedFee(feeInXLM);
+        
+        console.log('Fee Statistics:', {
+          baseFee: baseFeeInStroops + ' stroops',
+          feeInXLM: feeInXLM + ' XLM',
+          minFee: feeStats.fee_charged.min,
+          maxFee: feeStats.fee_charged.max,
+          p90Fee: feeStats.fee_charged.p90
         });
-    
-        const imageHash = `${resFile.data.IpfsHash}`;
-    
-        // Convert imageHash to ScVal string
-        const imageHashScVal = xdr.ScVal.scvString(imageHash);
-    
-        // Build transaction with explicit fee
-        const tx = new TransactionBuilder(account, {
-          fee: BASE_FEE.toString(),
-          networkPassphrase: NETWORK_PASSPHRASE,
-        })
-          .addOperation(contract.call("mint", addressScVal, imageHashScVal))
-          .setTimeout(30)
-          .build();
-    
-        // Simulate transaction
-        const simulateResponse = await server.simulateTransaction(tx);
-    
-        // Type-safe handling of simulation response
-        if ('result' in simulateResponse) {
-          // Use minResourceFee instead of resourceFee
-          const resourceFee = simulateResponse.minResourceFee ?? '0';
-    
-          // Convert from stroops to XLM (1 stroop = 0.0000001 XLM)
-          const feeInXLM = (parseInt(resourceFee) / 10000000).toFixed(4);
-          
-          setEstimatedFee(feeInXLM);
-        } else if ('error' in simulateResponse) {
-          // Handle error case
-          console.error("Fee estimation error:", simulateResponse.error);
-          setEstimatedFee(null);
-        } else {
-          // Fallback for unexpected response
-          console.error("Unexpected simulation response");
-          setEstimatedFee(null);
-        }
+        
       } catch (error) {
-        console.error("Fee estimation error:", error);
+        console.error("Network fee estimation error:", error);
         setEstimatedFee(null);
       }
     };
-    estimateTransactionFee()
-  }, [walletAddress, fileData]);
+  
+    // Only run fee estimation if wallet is connected
+    if (walletAddress) {
+      estimateTransactionFee();
+    }
+  }, [walletAddress]);
 
-//   const estimateTransactionFee = async () => {
-//   if (!walletAddress || !fileData) {
-//     setEstimatedFee(null);
-//     return;
-//   }
-
-//   try {
-//     const server = new SorobanRpc.Server(SOROBAN_URL);
-//     const account = await server.getAccount(walletAddress);
-
-//     const contract = new Contract(CONTRACT_ID);
-
-//     // Convert address to ScVal
-//     const addressScVal = new Address(walletAddress).toScVal();
-
-//     // Upload file to IPFS
-//     const formData = new FormData();
-//     formData.append("file", fileData);
-
-//     const resFile = await axios({
-//       method: "post",
-//       url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-//       data: formData,
-//       headers: {
-//         pinata_api_key: `227563abeb8fd7e92ea8`,
-//         pinata_secret_api_key: `08505f77c805fce6437535d44c0f52dead21cc76ffbfebef1709950d2e613092`,
-//         "Content-Type": "multipart/form-data",
-//       },
-//     });
-
-//     const imageHash = `${resFile.data.IpfsHash}`;
-
-//     // Convert imageHash to ScVal string
-//     const imageHashScVal = xdr.ScVal.scvString(imageHash);
-
-//     // Build transaction
-//     const tx = new TransactionBuilder(account, {
-//       networkPassphrase: NETWORK_PASSPHRASE,
-//     })
-//       .addOperation(contract.call("mint", addressScVal, imageHashScVal))
-//       .setTimeout(30)
-//       .build();
-
-//     // Get the fee estimation
-//     const simulateResponse = await server.simulateTransaction(tx);
-
-//     // Type guard to check if it's a successful simulation
-//     if ('result' in simulateResponse) {
-//       // Extract resource fee from the simulation result
-//       const resourceFee = simulateResponse.result.footprint.readOnly.length > 0 
-//         ? simulateResponse.result.minResourceFee 
-//         : '0';
-
-//       // Convert from stroops to XLM (1 stroop = 0.0000001 XLM)
-//       const feeInXLM = (parseInt(resourceFee) / 10000000).toFixed(4);
-      
-//       setEstimatedFee(feeInXLM);
-//     } else {
-//       // Handle error case
-//       console.error("Fee estimation error:", simulateResponse.error);
-//       setEstimatedFee(null);
-//     }
-//   } catch (error) {
-//     console.error("Fee estimation error:", error);
-//     setEstimatedFee(null);
-//   }
-// };
-
-// const estimateTransactionFee = async () => {
-//   if (!walletAddress || !fileData) {
-//     setEstimatedFee(null);
-//     return;
-//   }
-
-//   try {
-//     const server = new SorobanRpc.Server(SOROBAN_URL);
-//     const account = await server.getAccount(walletAddress);
-
-//     const contract = new Contract(CONTRACT_ID);
-
-//     // Convert address to ScVal
-//     const addressScVal = new Address(walletAddress).toScVal();
-
-//     // Upload file to IPFS
-//     const formData = new FormData();
-//     formData.append("file", fileData);
-
-//     const resFile = await axios({
-//       method: "post",
-//       url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-//       data: formData,
-//       headers: {
-//         pinata_api_key: `227563abeb8fd7e92ea8`,
-//         pinata_secret_api_key: `08505f77c805fce6437535d44c0f52dead21cc76ffbfebef1709950d2e613092`,
-//         "Content-Type": "multipart/form-data",
-//       },
-//     });
-
-//     const imageHash = `${resFile.data.IpfsHash}`;
-
-//     // Convert imageHash to ScVal string
-//     const imageHashScVal = xdr.ScVal.scvString(imageHash);
-
-//     // Build transaction with explicit fee
-//     const tx = new TransactionBuilder(account, {
-//       fee: BASE_FEE.toString(), // Use BASE_FEE explicitly
-//       networkPassphrase: NETWORK_PASSPHRASE,
-//     })
-//       .addOperation(contract.call("mint", addressScVal, imageHashScVal))
-//       .setTimeout(30)
-//       .build();
-
-//     // Simulate transaction
-//     const simulateResponse = await server.simulateTransaction(tx);
-
-//     // Type-safe handling of simulation response
-//     if ('result' in simulateResponse) {
-//       const result = simulateResponse.result;
-      
-//       // Safely access minResourceFee
-//       const resourceFee = result?.minResourceFee ?? '0';
-
-//       // Convert from stroops to XLM (1 stroop = 0.0000001 XLM)
-//       const feeInXLM = (parseInt(resourceFee) / 10000000).toFixed(4);
-      
-//       setEstimatedFee(feeInXLM);
-//     } else if ('error' in simulateResponse) {
-//       // Handle error case
-//       console.error("Fee estimation error:", simulateResponse.error);
-//       setEstimatedFee(null);
-//     } else {
-//       // Fallback for unexpected response
-//       console.error("Unexpected simulation response");
-//       setEstimatedFee(null);
-//     }
-//   } catch (error) {
-//     console.error("Fee estimation error:", error);
-//     setEstimatedFee(null);
-//   }
-// };
-
-// const estimateTransactionFee = async () => {
-//   if (!walletAddress || !fileData) {
-//     setEstimatedFee(null);
-//     return;
-//   }
-
-//   try {
-//     const server = new SorobanRpc.Server(SOROBAN_URL);
-//     const account = await server.getAccount(walletAddress);
-
-//     const contract = new Contract(CONTRACT_ID);
-
-//     // Convert address to ScVal
-//     const addressScVal = new Address(walletAddress).toScVal();
-
-//     // Upload file to IPFS
-//     const formData = new FormData();
-//     formData.append("file", fileData);
-
-//     const resFile = await axios({
-//       method: "post",
-//       url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-//       data: formData,
-//       headers: {
-//         pinata_api_key: `227563abeb8fd7e92ea8`,
-//         pinata_secret_api_key: `08505f77c805fce6437535d44c0f52dead21cc76ffbfebef1709950d2e613092`,
-//         "Content-Type": "multipart/form-data",
-//       },
-//     });
-
-//     const imageHash = `${resFile.data.IpfsHash}`;
-
-//     // Convert imageHash to ScVal string
-//     const imageHashScVal = xdr.ScVal.scvString(imageHash);
-
-//     // Build transaction with explicit fee
-//     const tx = new TransactionBuilder(account, {
-//       fee: BASE_FEE.toString(),
-//       networkPassphrase: NETWORK_PASSPHRASE,
-//     })
-//       .addOperation(contract.call("mint", addressScVal, imageHashScVal))
-//       .setTimeout(30)
-//       .build();
-
-//     // Simulate transaction
-//     const simulateResponse = await server.simulateTransaction(tx);
-
-//     // Type-safe handling of simulation response
-//     if ('result' in simulateResponse) {
-//       // Extract cost directly from the response
-//       const resourceFee = simulateResponse.resourceFee ?? '0';
-
-//       // Convert from stroops to XLM (1 stroop = 0.0000001 XLM)
-//       const feeInXLM = (parseInt(resourceFee) / 10000000).toFixed(4);
-      
-//       setEstimatedFee(feeInXLM);
-//     } else if ('error' in simulateResponse) {
-//       // Handle error case
-//       console.error("Fee estimation error:", simulateResponse.error);
-//       setEstimatedFee(null);
-//     } else {
-//       // Fallback for unexpected response
-//       console.error("Unexpected simulation response");
-//       setEstimatedFee(null);
-//     }
-//   } catch (error) {
-//     console.error("Fee estimation error:", error);
-//     setEstimatedFee(null);
-//   }
-// };
-
-
-
-  console.log("estimatedFee: "+estimatedFee)
-
+  // Minting Handler
   const handleMint = async () => {
-    console.log("MINTING START");
+    console.log("Minting started");
 
     if (!walletAddress) {
       alert("Wallet is not connected!");
@@ -421,26 +105,10 @@ export default function Home() {
     try {
       setLoading(true);
 
-      const formData = new FormData();
-      formData.append("file", fileData);
-
-      const resFile = await axios({
-        //code for uploading the file to pinata
-        method: "post",
-        url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-        data: formData,
-        headers: {
-          pinata_api_key: `
-            227563abeb8fd7e92ea8`,
-          pinata_secret_api_key: `
-            08505f77c805fce6437535d44c0f52dead21cc76ffbfebef1709950d2e613092`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const ImgHash = `${resFile.data.IpfsHash}`;
-
+      // For testing, using a hardcoded IPFS hash
+      const ImgHash = "QmegTodafnzZdPUanZ2RqnqYF3hoPmGETW8CHNc9SczSCx";
       setImageHash(ImgHash);
+      console.log("ImgHash: " + ImgHash);
 
       const server = new SorobanRpc.Server(SOROBAN_URL);
       const account = await server.getAccount(walletAddress);
@@ -451,11 +119,11 @@ export default function Home() {
       const addressScVal = new Address(walletAddress).toScVal();
 
       // Convert imageHash to ScVal string
-      const imageHashScVal = xdr.ScVal.scvString(imageHash);
+      const imageHashScVal = xdr.ScVal.scvString(ImgHash);
 
       console.log("Minting parameters:", {
         walletAddress,
-        imageHash,
+        imageHash: ImgHash,
         addressScVal: addressScVal.toString(),
         imageHashScVal: imageHashScVal.toString(),
       });
@@ -467,8 +135,11 @@ export default function Home() {
         .addOperation(contract.call("mint", addressScVal, imageHashScVal))
         .setTimeout(30)
         .build();
-      
+
       const preparedTx = await server.prepareTransaction(tx);
+
+      const feeInXLM = (Number(preparedTx._tx._attributes.fee) / 10000000).toFixed(4);
+      console.log("Transaction Fee:", feeInXLM);
 
       const { signedTxXdr } = await kit.signTransaction(
         preparedTx.toEnvelope().toXDR("base64"),
@@ -477,8 +148,6 @@ export default function Home() {
           networkPassphrase: WalletNetwork.TESTNET,
         }
       );
-
-      console.log( signedTxXdr )
 
       const parsedTransaction = TransactionBuilder.fromXDR(
         signedTxXdr,
@@ -525,13 +194,11 @@ export default function Home() {
         if (returnValue) {
           console.log("Return value:", returnValue);
 
-          // Uncomment and modify if needed
           const mintedImageHash = scValToNative(returnValue);
           setImageHash(""); // Clear the input
           alert(`Successfully minted image with hash: ${mintedImageHash}`);
         }
       } else {
-        // Log more detailed error information
         console.error("Transaction error details:", {
           status: getResponse.status,
           resultXdr: getResponse,
@@ -543,7 +210,6 @@ export default function Home() {
       console.error("Full error object:", error);
       console.error("Error message:", error.message);
 
-      // Add more detailed error logging
       if (error.response) {
         console.error("Response error:", error.response);
       }
@@ -580,13 +246,14 @@ export default function Home() {
           <FileUpload fileData={fileData} setFileData={setFileData} />
         </div>
         <button
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            onClick={handleMint}
-          >
-            {estimatedFee 
+          className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+          onClick={handleMint}
+          disabled={!isConnected || loading}
+        >
+          {estimatedFee 
             ? `Mint (Estimated Fee: ${estimatedFee} XLM)` 
             : "Preparing Mint..."}
-          </button>
+        </button>
       </main>
     </div>
   );
