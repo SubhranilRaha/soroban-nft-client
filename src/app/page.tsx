@@ -1,6 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { FileUpload } from "@/components/file-upload";
+import {
+  allowAllModules,
+  FREIGHTER_ID,
+  ISupportedWallet,
+  StellarWalletsKit,
+  WalletNetwork,
+} from "@creit.tech/stellar-wallets-kit";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import {
   Address,
   BASE_FEE,
@@ -11,22 +20,6 @@ import {
   TransactionBuilder,
   xdr,
 } from "stellar-sdk";
-import * as StellarSdk from 'stellar-sdk';
-import Image from "next/image";
-import {
-  StellarWalletsKit,
-  WalletNetwork,
-  allowAllModules,
-  XBULL_ID,
-  ISupportedWallet,
-  FREIGHTER_ID,
-  FreighterModule
-} from "@creit.tech/stellar-wallets-kit";
-import { LedgerModule } from '@creit.tech/stellar-wallets-kit/modules/ledger.module';
-import { FileUpload } from "@/components/file-upload";
-import axios from "axios";
-
-const horizonServer = new StellarSdk.Horizon.Server('https://horizon.stellar.org');
 
 const kit: StellarWalletsKit = new StellarWalletsKit({
   network: WalletNetwork.TESTNET,
@@ -35,7 +28,7 @@ const kit: StellarWalletsKit = new StellarWalletsKit({
 });
 
 export const CONTRACT_ID =
-  "CCWGOA3N4TQLAAAFQKCQGNAQGB5ML7I67OREIFKWZXCSSU7KQKHEZBUL";
+  "CB6KXLA5O36CRPHB3YE2AENKM5WSJIIPSZLYGSUW3RW3NILFKDLY4625";
 export const NETWORK_PASSPHRASE = Networks.TESTNET;
 export const SOROBAN_URL = "https://soroban-testnet.stellar.org:443";
 
@@ -47,7 +40,185 @@ export default function Home() {
   const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
   const isConnected = walletAddress !== "";
 
+  // async function calculateMintFunctionCost(
+  //   walletAddress: string,
+  //   imageHash: string
+  // ): Promise<string | null> {
+  //   if (!walletAddress) {
+  //     console.error("Wallet address is required");
+  //     return null;
+  //   }
+
+  //   try {
+  //     const server = new SorobanRpc.Server(SOROBAN_URL);
+  //     const account = await server.getAccount(walletAddress);
+
+  //     const contract = new Contract(CONTRACT_ID);
+
+  //     // Convert address to ScVal
+  //     const addressScVal = new Address(walletAddress).toScVal();
+
+  //     // Convert imageHash to ScVal string
+  //     const imageHashScVal = xdr.ScVal.scvString(imageHash);
+
+  //     const tx = new TransactionBuilder(account, {
+  //       fee: BASE_FEE,
+  //       networkPassphrase: NETWORK_PASSPHRASE,
+  //     })
+  //       .addOperation(contract.call("mint", addressScVal, imageHashScVal))
+  //       .setTimeout(30)
+  //       .build();
+
+  //     // Simulate the transaction to get a more accurate fee estimation
+  //     const simulateResponse = await server.simulateTransaction(tx);
+  //     console.log("Simulation Response:", simulateResponse);
+
+  //     let estimatedFee: string;
+
+  //     // Check if simulateResponse contains resource fee information
+  //     if (simulateResponse && simulateResponse.minResourceFee) {
+  //       // Convert resource fee from stroops to XLM
+  //       const minResourceFeeInXLM = Number(simulateResponse.minResourceFee) / 10_000_000;
+
+  //       // Convert base fee from stroops to XLM
+  //       const baseFeeInXLM = Number(BASE_FEE) / 10_000_000;
+
+  //       // Total estimated fee
+  //       estimatedFee = (minResourceFeeInXLM + baseFeeInXLM).toFixed(4);
+  //     } else {
+  //       // Fallback to base fee if no detailed simulation is available
+  //       estimatedFee = (Number(BASE_FEE) / 10_000_000).toFixed(4);
+  //     }
+
+  //     return estimatedFee;
+  //   } catch (error) {
+  //     console.error("Mint function cost calculation error:", error);
+  //     return null;
+  //   }
+  // }
+
   // Wallet Connection Handler
+
+  // async function calculateMintFunctionCost(
+  //   owner: string,
+  //   tokenUri: string,
+  //   isFreeMintsAvailable: boolean = true
+  // ): Promise<numb | null> {
+  //   // Soroban-specific constants
+  // const STROOP = 0.0000001;  // Stellar's smallest unit
+  // const BASE_FEE = 0.00001;  // Base transaction fee
+  // const BASE_RESERVE = 0.5;  // Account base reserve
+
+  // // Estimate operation complexity
+  // let operationCount = 0;
+  // let storageOperations = 0;
+
+  // // Authentication check
+  // operationCount++;
+
+  // // Minting frozen check
+  // operationCount++;
+
+  // // Token count retrieval
+  // storageOperations++;
+  // operationCount++;
+
+  // // Maximum token limit check
+  // operationCount++;
+
+  // // Token count increment
+  // storageOperations++;
+  // operationCount++;
+
+  // // Collection info retrieval
+  // storageOperations++;
+  // operationCount++;
+
+  // // Paid minting logic (if applicable)
+  // if (!isFreeMintsAvailable) {
+  //   // Balance check
+  //   operationCount++;
+    
+  //   // Token transfer
+  //   operationCount++;
+  // }
+
+  // // Token info creation and storage
+  // storageOperations += 2;
+  // operationCount++;
+
+  // // Tokens count update
+  // storageOperations++;
+  // operationCount++;
+
+  // // Max token ID update
+  // storageOperations++;
+  // operationCount++;
+
+  // // Event emission
+  // operationCount++;
+
+  // // Cost calculation
+  // const operationFee = operationCount * BASE_FEE;
+  // const storageOperationFee = storageOperations * (BASE_FEE * 2);  // Storage ops typically cost more
+
+  // // Additional costs for complex operations
+  // const complexOperationMultiplier = 1.5;
+
+  // // Estimated transaction cost
+  // const estimatedCost = {
+  //   operationCount,
+  //   storageOperations,
+  //   baseFee: operationFee,
+  //   storageFee: storageOperationFee,
+  //   complexOperationAdjustment: complexOperationMultiplier,
+  //   totalEstimatedCost: (operationFee + storageOperationFee) * complexOperationMultiplier,
+    
+  //   // Detailed breakdown for transparency
+  //   breakdown: {
+  //     baseOperationFee: operationFee,
+  //     storageOperationFee: storageOperationFee,
+  //     complexOperationMultiplier: complexOperationMultiplier
+  //   }
+  // }
+
+  // console.log('Mint Function Cost Estimation:', {
+  //   owner,
+  //   tokenUri,
+  //   isFreeMintsAvailable,
+  //   totalEstimatedCost: estimatedCost.totalEstimatedCost.toFixed(6) + ' XLM',
+  //   operationCount: estimatedCost.operationCount,
+  //   storageOperations: estimatedCost.storageOperations
+  // });
+
+  // return estimatedCost.totalEstimatedCost;
+  // }
+
+  async function calculateMintFunctionCost(
+    walletAddress: string,
+    imageHash: string
+  ): Promise<number> {
+    // Constants
+    const BASE_RESERVE = 0.5;
+    const BASE_FEE = 0.00001;
+    const MINT_COST = 1; // 1 XLM
+  
+    const baseReserveCount = 2 + (imageHash ? 1 : 0);
+    const operationsCount = 4 + (imageHash ? 1 : 0);
+  
+    const reserveCost = baseReserveCount * BASE_RESERVE;
+    const feeCost = operationsCount * BASE_FEE;
+    
+    const isPaidMinting = true;
+  
+    const totalCost = reserveCost + feeCost + (isPaidMinting ? MINT_COST : 0);
+    console.log(totalCost)
+    return totalCost;
+  }
+
+
+
+
   const handleClick = async () => {
     await kit.openModal({
       onWalletSelected: async (option: ISupportedWallet) => {
@@ -58,38 +229,33 @@ export default function Home() {
     });
   };
 
-  // Transaction Fee Estimation Effect
   useEffect(() => {
-    const estimateTransactionFee = async () => {
+    const estimateFee = async () => {
+      if (!walletAddress) {
+        return;
+      }
+
       try {
-        // Fetch fee statistics from Horizon server
-        const feeStats = await horizonServer.feeStats();
-        
-        // Choose a fee strategy (using mode/most common fee)
-        const baseFeeInStroops = feeStats.fee_charged.mode;
-        
-        // Convert stroops to XLM (1 XLM = 10,000,000 stroops)
-        const feeInXLM = (Number(baseFeeInStroops) / 10_000_000).toFixed(4);
-        
-        setEstimatedFee(feeInXLM);
-        
-        console.log('Fee Statistics:', {
-          baseFee: baseFeeInStroops + ' stroops',
-          feeInXLM: feeInXLM + ' XLM',
-          minFee: feeStats.fee_charged.min,
-          maxFee: feeStats.fee_charged.max,
-          p90Fee: feeStats.fee_charged.p90
-        });
-        
+        setLoading(true);
+        const ImgHash = "QmegTodafnzZdPUanZ2RqnqYF3hoPmGETW8CHNc9SczXCx";
+
+        // Use the calculateMintFunctionCost function
+        const estimatedFee = await calculateMintFunctionCost(
+          walletAddress,
+          ImgHash
+        );
+
+        setEstimatedFee(estimatedFee);
       } catch (error) {
-        console.error("Network fee estimation error:", error);
+        console.error("Fee estimation error:", error);
         setEstimatedFee(null);
+      } finally {
+        setLoading(false);
       }
     };
-  
-    // Only run fee estimation if wallet is connected
+
     if (walletAddress) {
-      estimateTransactionFee();
+      estimateFee();
     }
   }, [walletAddress]);
 
@@ -136,9 +302,13 @@ export default function Home() {
         .setTimeout(30)
         .build();
 
-      const preparedTx = await server.prepareTransaction(tx);
+        console.log("tx:"+JSON.stringify(tx))
 
-      const feeInXLM = (Number(preparedTx._tx._attributes.fee) / 10000000).toFixed(4);
+      const preparedTx = await server.prepareTransaction(tx);
+      console.log("px:"+JSON.stringify(preparedTx))
+      const feeInXLM = (
+        Number(preparedTx._tx._attributes.fee) / 10000000
+      ).toFixed(4);
       console.log("Transaction Fee:", feeInXLM);
 
       const { signedTxXdr } = await kit.signTransaction(
@@ -250,8 +420,8 @@ export default function Home() {
           onClick={handleMint}
           disabled={!isConnected || loading}
         >
-          {estimatedFee 
-            ? `Mint (Estimated Fee: ${estimatedFee} XLM)` 
+          {estimatedFee
+            ? `Mint (Estimated Fee: ${estimatedFee} XLM)`
             : "Preparing Mint..."}
         </button>
       </main>
