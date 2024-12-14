@@ -3,6 +3,8 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 interface IPFSMetadataResult {
   url: string;
   hash: string;
+  title?: string;
+  description?: string;
 }
 
 export async function fetchIPFSMetadata(hash: string): Promise<IPFSMetadataResult> {
@@ -31,7 +33,9 @@ export async function fetchIPFSMetadata(hash: string): Promise<IPFSMetadataResul
       console.log(response);
       return {
         url: url,
-        hash: hash
+        hash: hash,
+        title: 'Shared IPFS Image', // Default title
+        description: 'Shared content from IPFS' // Default description
       };
     } catch (error) {
       if (error instanceof AxiosError) {

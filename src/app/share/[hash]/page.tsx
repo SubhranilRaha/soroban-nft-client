@@ -1,10 +1,13 @@
-// src/app/share/[hash]/page.tsx
 import { Metadata } from "next";
 import { fetchIPFSMetadata } from "@/lib/ipfs";
 import SharePageClient from "./SharePageClient";
 
+type Params = {
+  hash: string;
+};
+
 type Props = {
-  params: { hash: string };
+  params: Params;
 };
 
 type IPFSMetadata = {
