@@ -9,7 +9,7 @@ interface FileUploadProps {
 
 export const FileUpload: React.FC<FileUploadProps> = ({ fileData, setFileData }) => {
   const [preview, setPreview] = useState<string | null>(null);
-
+  console.log(fileData)
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     setFileData(file);

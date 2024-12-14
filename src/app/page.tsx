@@ -216,6 +216,7 @@ export default function Home() {
     return totalCost;
   }
 
+  console.log(imageHash)
 
 
 

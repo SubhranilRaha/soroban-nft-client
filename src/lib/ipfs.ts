@@ -24,6 +24,8 @@ export async function fetchIPFSMetadata(hash: string) {
         }
       });
 
+      console.log(response)
+
       return { 
         url: url,
         hash: hash
