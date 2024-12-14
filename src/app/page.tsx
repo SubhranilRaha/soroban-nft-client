@@ -1,44 +1,44 @@
 "use client";
 import ImageShareForm from '../components/ImageShareForm';
-import { FileUpload } from "@/components/file-upload";
-import {
-  allowAllModules,
-  FREIGHTER_ID,
-  ISupportedWallet,
-  StellarWalletsKit,
-  WalletNetwork,
-} from "@creit.tech/stellar-wallets-kit";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import {
-  Address,
-  BASE_FEE,
-  Contract,
-  Networks,
-  scValToNative,
-  SorobanRpc,
-  TransactionBuilder,
-  xdr,
-} from "stellar-sdk";
+// import { FileUpload } from "@/components/file-upload";
+// import {
+//   allowAllModules,
+//   FREIGHTER_ID,
+//   // ISupportedWallet,
+//   StellarWalletsKit,
+//   WalletNetwork,
+// } from "@creit.tech/stellar-wallets-kit";
+// import Image from "next/image";
+// import { useEffect, useState } from "react";
+// import {
+//   Address,
+//   BASE_FEE,
+//   Contract,
+//   Networks,
+//   scValToNative,
+//   SorobanRpc,
+//   TransactionBuilder,
+//   xdr,
+// } from "stellar-sdk";
 
-const kit: StellarWalletsKit = new StellarWalletsKit({
-  network: WalletNetwork.TESTNET,
-  selectedWalletId: FREIGHTER_ID,
-  modules: allowAllModules(),
-});
+// const kit: StellarWalletsKit = new StellarWalletsKit({
+//   network: WalletNetwork.TESTNET,
+//   selectedWalletId: FREIGHTER_ID,
+//   modules: allowAllModules(),
+// });
 
-export const CONTRACT_ID =
-  "CB6KXLA5O36CRPHB3YE2AENKM5WSJIIPSZLYGSUW3RW3NILFKDLY4625";
-export const NETWORK_PASSPHRASE = Networks.TESTNET;
-export const SOROBAN_URL = "https://soroban-testnet.stellar.org:443";
+// export const CONTRACT_ID =
+//   "CB6KXLA5O36CRPHB3YE2AENKM5WSJIIPSZLYGSUW3RW3NILFKDLY4625";
+// export const NETWORK_PASSPHRASE = Networks.TESTNET;
+// export const SOROBAN_URL = "https://soroban-testnet.stellar.org:443";
 
 export default function Home() {
-  const [walletAddress, setWalletAddress] = useState("");
-  const [fileData, setFileData] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [imageHash, setImageHash] = useState("");
-  const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
-  const isConnected = walletAddress !== "";
+  // const [walletAddress, setWalletAddress] = useState("");
+  // const [fileData, setFileData] = useState<File | null>(null);
+  // const [loading, setLoading] = useState(false);
+  // const [imageHash, setImageHash] = useState("");
+  // const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
+  // const isConnected = walletAddress !== "";
   
   // async function calculateMintFunctionCost(
   //   walletAddress: string,
@@ -194,205 +194,205 @@ export default function Home() {
   // return estimatedCost.totalEstimatedCost;
   // }
 
-  async function calculateMintFunctionCost(
-    walletAddress: string,
-    imageHash: string
-  ): Promise<number> {
-    // Constants
-    const BASE_RESERVE = 0.5;
-    const BASE_FEE = 0.00001;
-    const MINT_COST = 1; // 1 XLM
+  // async function calculateMintFunctionCost(
+  //   walletAddress: string,
+  //   imageHash: string
+  // ): Promise<number> {
+  //   // Constants
+  //   const BASE_RESERVE = 0.5;
+  //   const BASE_FEE = 0.00001;
+  //   const MINT_COST = 1; // 1 XLM
   
-    const baseReserveCount = 2 + (imageHash ? 1 : 0);
-    const operationsCount = 4 + (imageHash ? 1 : 0);
+  //   const baseReserveCount = 2 + (imageHash ? 1 : 0);
+  //   const operationsCount = 4 + (imageHash ? 1 : 0);
   
-    const reserveCost = baseReserveCount * BASE_RESERVE;
-    const feeCost = operationsCount * BASE_FEE;
+  //   const reserveCost = baseReserveCount * BASE_RESERVE;
+  //   const feeCost = operationsCount * BASE_FEE;
     
-    const isPaidMinting = true;
+  //   const isPaidMinting = true;
   
-    const totalCost = reserveCost + feeCost + (isPaidMinting ? MINT_COST : 0);
-    console.log(totalCost)
-    return totalCost;
-  }
+  //   const totalCost = reserveCost + feeCost + (isPaidMinting ? MINT_COST : 0);
+  //   console.log(totalCost)
+  //   return totalCost;
+  // }
 
-  console.log(imageHash)
+  // console.log(imageHash)
 
 
 
-  const handleClick = async () => {
-    await kit.openModal({
-      onWalletSelected: async (option: ISupportedWallet) => {
-        kit.setWallet(option.id);
-        const { address } = await kit.getAddress();
-        setWalletAddress(address);
-      },
-    });
-  };
+  // const handleClick = async () => {
+  //   await kit.openModal({
+  //     onWalletSelected: async (option: ISupportedWallet) => {
+  //       kit.setWallet(option.id);
+  //       const { address } = await kit.getAddress();
+  //       setWalletAddress(address);
+  //     },
+  //   });
+  // };
 
-  useEffect(() => {
-    const estimateFee = async () => {
-      if (!walletAddress) {
-        return;
-      }
+  // useEffect(() => {
+  //   const estimateFee = async () => {
+  //     if (!walletAddress) {
+  //       return;
+  //     }
 
-      try {
-        setLoading(true);
-        const ImgHash = "QmegTodafnzZdPUanZ2RqnqYF3hoPmGETW8CHNc9SczXCx";
+  //     try {
+  //       setLoading(true);
+  //       const ImgHash = "QmegTodafnzZdPUanZ2RqnqYF3hoPmGETW8CHNc9SczXCx";
 
-        // Use the calculateMintFunctionCost function
-        const estimatedFee = await calculateMintFunctionCost(
-          walletAddress,
-          ImgHash
-        );
+  //       // Use the calculateMintFunctionCost function
+  //       const estimatedFee = await calculateMintFunctionCost(
+  //         walletAddress,
+  //         ImgHash
+  //       );
 
-        setEstimatedFee(estimatedFee);
-      } catch (error) {
-        console.error("Fee estimation error:", error);
-        setEstimatedFee(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       setEstimatedFee(estimatedFee);
+  //     } catch (error) {
+  //       console.error("Fee estimation error:", error);
+  //       setEstimatedFee(null);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    if (walletAddress) {
-      estimateFee();
-    }
-  }, [walletAddress]);
+  //   if (walletAddress) {
+  //     estimateFee();
+  //   }
+  // }, [walletAddress]);
 
   // Minting Handler
-  const handleMint = async () => {
-    console.log("Minting started");
+  // const handleMint = async () => {
+  //   console.log("Minting started");
 
-    if (!walletAddress) {
-      alert("Wallet is not connected!");
-      return;
-    }
+  //   if (!walletAddress) {
+  //     alert("Wallet is not connected!");
+  //     return;
+  //   }
 
-    try {
-      setLoading(true);
+  //   try {
+  //     setLoading(true);
 
-      // For testing, using a hardcoded IPFS hash
-      const ImgHash = "QmegTodafnzZdPUanZ2RqnqYF3hoPmGETW8CHNc9SczSCx";
-      setImageHash(ImgHash);
-      console.log("ImgHash: " + ImgHash);
+  //     // For testing, using a hardcoded IPFS hash
+  //     const ImgHash = "QmegTodafnzZdPUanZ2RqnqYF3hoPmGETW8CHNc9SczSCx";
+  //     setImageHash(ImgHash);
+  //     console.log("ImgHash: " + ImgHash);
 
-      const server = new SorobanRpc.Server(SOROBAN_URL);
-      const account = await server.getAccount(walletAddress);
+  //     const server = new SorobanRpc.Server(SOROBAN_URL);
+  //     const account = await server.getAccount(walletAddress);
 
-      const contract = new Contract(CONTRACT_ID);
+  //     const contract = new Contract(CONTRACT_ID);
 
-      // Convert address to ScVal
-      const addressScVal = new Address(walletAddress).toScVal();
+  //     // Convert address to ScVal
+  //     const addressScVal = new Address(walletAddress).toScVal();
 
-      // Convert imageHash to ScVal string
-      const imageHashScVal = xdr.ScVal.scvString(ImgHash);
+  //     // Convert imageHash to ScVal string
+  //     const imageHashScVal = xdr.ScVal.scvString(ImgHash);
 
-      console.log("Minting parameters:", {
-        walletAddress,
-        imageHash: ImgHash,
-        addressScVal: addressScVal.toString(),
-        imageHashScVal: imageHashScVal.toString(),
-      });
+  //     console.log("Minting parameters:", {
+  //       walletAddress,
+  //       imageHash: ImgHash,
+  //       addressScVal: addressScVal.toString(),
+  //       imageHashScVal: imageHashScVal.toString(),
+  //     });
 
-      const tx = new TransactionBuilder(account, {
-        fee: BASE_FEE,
-        networkPassphrase: NETWORK_PASSPHRASE,
-      })
-        .addOperation(contract.call("mint", addressScVal, imageHashScVal))
-        .setTimeout(30)
-        .build();
+  //     const tx = new TransactionBuilder(account, {
+  //       fee: BASE_FEE,
+  //       networkPassphrase: NETWORK_PASSPHRASE,
+  //     })
+  //       .addOperation(contract.call("mint", addressScVal, imageHashScVal))
+  //       .setTimeout(30)
+  //       .build();
 
-        console.log("tx:"+JSON.stringify(tx))
+  //       console.log("tx:"+JSON.stringify(tx))
 
-      const preparedTx = await server.prepareTransaction(tx);
-      console.log("px:"+JSON.stringify(preparedTx))
-      const feeInXLM = (
-        Number(preparedTx._tx._attributes.fee) / 10000000
-      ).toFixed(4);
-      console.log("Transaction Fee:", feeInXLM);
+  //     const preparedTx = await server.prepareTransaction(tx);
+  //     console.log("px:"+JSON.stringify(preparedTx))
+  //     const feeInXLM = (
+  //       Number(preparedTx._tx._attributes.fee) / 10000000
+  //     ).toFixed(4);
+  //     console.log("Transaction Fee:", feeInXLM);
 
-      const { signedTxXdr } = await kit.signTransaction(
-        preparedTx.toEnvelope().toXDR("base64"),
-        {
-          address: walletAddress,
-          networkPassphrase: WalletNetwork.TESTNET,
-        }
-      );
+  //     const { signedTxXdr } = await kit.signTransaction(
+  //       preparedTx.toEnvelope().toXDR("base64"),
+  //       {
+  //         address: walletAddress,
+  //         networkPassphrase: WalletNetwork.TESTNET,
+  //       }
+  //     );
 
-      const parsedTransaction = TransactionBuilder.fromXDR(
-        signedTxXdr,
-        Networks.TESTNET
-      );
+  //     const parsedTransaction = TransactionBuilder.fromXDR(
+  //       signedTxXdr,
+  //       Networks.TESTNET
+  //     );
 
-      const txResult = await server.sendTransaction(parsedTransaction);
+  //     const txResult = await server.sendTransaction(parsedTransaction);
 
-      if (!txResult || txResult.status !== "PENDING") {
-        throw new Error(
-          `Transaction failed with status: ${txResult?.status || "Unknown"}`
-        );
-      }
+  //     if (!txResult || txResult.status !== "PENDING") {
+  //       throw new Error(
+  //         `Transaction failed with status: ${txResult?.status || "Unknown"}`
+  //       );
+  //     }
 
-      console.log("Transaction sent successfully:", txResult.hash);
+  //     console.log("Transaction sent successfully:", txResult.hash);
 
-      const hash = txResult.hash;
-      let getResponse = await server.getTransaction(hash);
-      let retryCount = 0;
-      const maxRetries = 30;
+  //     const hash = txResult.hash;
+  //     let getResponse = await server.getTransaction(hash);
+  //     let retryCount = 0;
+  //     const maxRetries = 30;
 
-      while (getResponse.status === "NOT_FOUND" && retryCount < maxRetries) {
-        console.log(
-          `Waiting for transaction confirmation... Attempt ${retryCount + 1}`
-        );
-        getResponse = await server.getTransaction(hash);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        retryCount++;
-      }
+  //     while (getResponse.status === "NOT_FOUND" && retryCount < maxRetries) {
+  //       console.log(
+  //         `Waiting for transaction confirmation... Attempt ${retryCount + 1}`
+  //       );
+  //       getResponse = await server.getTransaction(hash);
+  //       await new Promise((resolve) => setTimeout(resolve, 1000));
+  //       retryCount++;
+  //     }
 
-      if (retryCount >= maxRetries) {
-        throw new Error("Transaction confirmation timed out");
-      }
+  //     if (retryCount >= maxRetries) {
+  //       throw new Error("Transaction confirmation timed out");
+  //     }
 
-      if (getResponse.status === "SUCCESS") {
-        if (!getResponse.resultMetaXdr) {
-          throw new Error("Empty resultMetaXDR in getTransaction response");
-        }
-        const returnValue = getResponse.resultMetaXdr
-          .v3()
-          .sorobanMeta()
-          ?.returnValue();
+  //     if (getResponse.status === "SUCCESS") {
+  //       if (!getResponse.resultMetaXdr) {
+  //         throw new Error("Empty resultMetaXDR in getTransaction response");
+  //       }
+  //       const returnValue = getResponse.resultMetaXdr
+  //         .v3()
+  //         .sorobanMeta()
+  //         ?.returnValue();
 
-        if (returnValue) {
-          console.log("Return value:", returnValue);
+  //       if (returnValue) {
+  //         console.log("Return value:", returnValue);
 
-          const mintedImageHash = scValToNative(returnValue);
-          setImageHash(""); // Clear the input
-          alert(`Successfully minted image with hash: ${mintedImageHash}`);
-        }
-      } else {
-        console.error("Transaction error details:", {
-          status: getResponse.status,
-          resultXdr: getResponse,
-        });
+  //         const mintedImageHash = scValToNative(returnValue);
+  //         setImageHash(""); // Clear the input
+  //         alert(`Successfully minted image with hash: ${mintedImageHash}`);
+  //       }
+  //     } else {
+  //       console.error("Transaction error details:", {
+  //         status: getResponse.status,
+  //         resultXdr: getResponse,
+  //       });
 
-        throw new Error(`Transaction failed: ${getResponse}`);
-      }
-    } catch (error) {
-      console.error("Full error object:", error);
-      console.error("Error message:", error.message);
+  //       throw new Error(`Transaction failed: ${getResponse}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Full error object:", error);
+  //     console.error("Error message:", error.message);
 
-      if (error.response) {
-        console.error("Response error:", error.response);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (error.response) {
+  //       console.error("Response error:", error.response);
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center">
-        <div className="flex flex-col gap-4">
+        {/* <div className="flex flex-col gap-4">
           <p className="text-4xl text-center font-bold">Soroban NFT</p>
           {walletAddress === "" ? null : (
             <p className="text-center text-xs">Connected to: {walletAddress}</p>
@@ -401,7 +401,7 @@ export default function Home() {
         <div className="flex gap-4 items-center justify-center flex-col sm:flex-row">
           <button
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            onClick={handleClick}
+            // onClick={handleClick}
           >
             <Image
               className="dark:invert"
@@ -418,15 +418,15 @@ export default function Home() {
         </div>
         <button
           className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-          onClick={handleMint}
+          // onClick={handleMint}
           disabled={!isConnected || loading}
         >
           {estimatedFee
             ? `Mint (Estimated Fee: ${estimatedFee} XLM)`
             : "Preparing Mint..."}
-        </button>
+        </button> */}
         <main className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">IPFS Image Share Preview</h1>
+      <h1 className="text-2xl font-bold mb-4 flex justify-center">IPFS Image Share Preview</h1>
     </main>
     <ImageShareForm />
       </main>

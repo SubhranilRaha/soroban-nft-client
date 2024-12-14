@@ -21,7 +21,7 @@ export default function ImageShareForm() {
         value={ipfsHash}
         onChange={(e) => setIpfsHash(e.target.value)}
         placeholder="Enter IPFS Hash" 
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded text-black"
       />
       <button 
         type="submit" 
