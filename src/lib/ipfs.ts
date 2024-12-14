@@ -1,7 +1,11 @@
-import axios from 'axios';
-// import axios from ""
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
-export async function fetchIPFSMetadata(hash: string) {
+interface IPFSMetadataResult {
+  url: string;
+  hash: string;
+}
+
+export async function fetchIPFSMetadata(hash: string): Promise<IPFSMetadataResult> {
   const gateways = [
     'https://ipfs.io/ipfs/',
     'https://cloudflare-ipfs.com/ipfs/',
@@ -13,25 +17,28 @@ export async function fetchIPFSMetadata(hash: string) {
       const url = `${baseUrl}${hash}`;
       console.log('Attempting gateway:', url);
 
-      const response = await axios.get(url, {
+      const response: AxiosResponse = await axios.get(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0',
           'Accept': '*/*'
         },
         timeout: 5000,
         validateStatus: function (status) {
-          return status >= 200 && status < 300; // Default
+          return status >= 200 && status < 300;
         }
       });
 
-      console.log(response)
-
-      return { 
+      console.log(response);
+      return {
         url: url,
         hash: hash
       };
-    } catch (error: any) {
-      console.warn(`Failed with gateway ${baseUrl}:`, error.message);
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        console.warn(`Failed with gateway ${baseUrl}:`, error.message);
+      } else {
+        console.warn(`Unexpected error with gateway ${baseUrl}:`, error);
+      }
     }
   }
 
