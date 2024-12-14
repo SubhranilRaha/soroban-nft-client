@@ -1,5 +1,5 @@
 "use client";
-
+import ImageShareForm from '../components/ImageShareForm';
 import { FileUpload } from "@/components/file-upload";
 import {
   allowAllModules,
@@ -39,7 +39,7 @@ export default function Home() {
   const [imageHash, setImageHash] = useState("");
   const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
   const isConnected = walletAddress !== "";
-
+  
   // async function calculateMintFunctionCost(
   //   walletAddress: string,
   //   imageHash: string
@@ -424,6 +424,10 @@ export default function Home() {
             ? `Mint (Estimated Fee: ${estimatedFee} XLM)`
             : "Preparing Mint..."}
         </button>
+        <main className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">IPFS Image Share Preview</h1>
+    </main>
+    <ImageShareForm />
       </main>
     </div>
   );
