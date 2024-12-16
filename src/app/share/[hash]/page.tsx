@@ -1,27 +1,17 @@
 import { Metadata } from "next";
 import { fetchIPFSMetadata } from "@/lib/ipfs";
-import SharePageClient from "./SharePageClient";
-
-type Params = {
-  hash: string;
-};
+import SharePageClient from "../[hash]/SharePageClient";
 
 type Props = {
-  params: Params;
-};
-
-type IPFSMetadata = {
-  url: string;
-  hash: string;
-  title?: string;
-  description?: string;
+  params: Promise<{hash: string}>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const hash = String(params.hash);
+  const hash = (await params).hash
   
   try {
-    const metadata = await fetchIPFSMetadata(hash) as IPFSMetadata;
+    const metadata = await fetchIPFSMetadata(hash);
     const imageUrl = metadata.url || `https://ipfs.io/ipfs/${hash}`;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://ipfs.io/ipfs/${hash}`;
 
@@ -69,10 +59,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function SharePage({ params }: Props) {
-  const hash = String(params.hash);
+  const hash = (await params).hash
   
   try {
-    const metadata = await fetchIPFSMetadata(hash) as IPFSMetadata;
+    const metadata = await fetchIPFSMetadata(hash);
 
     return (
       <SharePageClient 

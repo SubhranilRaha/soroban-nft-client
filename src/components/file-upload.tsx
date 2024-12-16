@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ChangeEvent, useState } from "react";
 
 interface FileUploadProps {
@@ -7,9 +8,12 @@ interface FileUploadProps {
   setFileData: (file: File | null) => void;
 }
 
-export const FileUpload: React.FC<FileUploadProps> = ({ fileData, setFileData }) => {
+export const FileUpload: React.FC<FileUploadProps> = ({
+  fileData,
+  setFileData,
+}) => {
   const [preview, setPreview] = useState<string | null>(null);
-  console.log(fileData)
+  console.log(fileData);
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     setFileData(file);
@@ -28,7 +32,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({ fileData, setFileData })
     <div className="flex flex-col items-center justify-center w-full">
       {preview ? (
         <div className="relative h-64 aspect-square">
-          <img
+          <Image
+            width={512}
+            height={512}
             src={preview}
             alt="Uploaded preview"
             className="w-full h-full object-cover rounded-lg shadow-md"

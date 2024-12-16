@@ -11,6 +11,7 @@ import {
   ToastViewport 
 } from "@/components/ui/toast";
 import { Copy, Check } from "lucide-react";
+import Image from 'next/image';
 
 type SharePageClientProps = {
   hash: string;
@@ -52,7 +53,9 @@ export default function SharePageClient({
       <div className="flex flex-col items-center space-y-4">
         <h1 className="text-2xl font-bold">{title}</h1>
         {description && <p className="text-gray-600 mb-4">{description}</p>}
-        <img 
+        <Image 
+          width={512}
+          height={512}
           src={imageUrl} 
           alt={title} 
           className="max-w-full max-h-[600px] object-contain"
