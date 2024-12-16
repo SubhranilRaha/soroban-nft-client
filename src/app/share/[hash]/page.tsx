@@ -12,8 +12,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   try {
     const metadata = await fetchIPFSMetadata(hash);
-    const imageUrl = metadata.url || `https://ipfs.io/ipfs/${hash}`;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://ipfs.io/ipfs/${hash}`;
+    // const imageUrl = metadata.url || `https://ipfs.io/ipfs/${hash}`;
+    // const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://ipfs.io/ipfs/${hash}`;
 
     return {
       title: metadata.title || 'Shared IPFS Image',
@@ -22,32 +22,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: metadata.title || 'Shared IPFS Image',
         description: metadata.description || 'Shared content from IPFS',
         images: [
-          {
-            url: imageUrl,
-            width: 460,
-            height: 300,
-            alt: metadata.title || 'Shared Image'
-          }
+          // {
+          //   url: imageUrl,
+          //   width: 460,
+          //   height: 300,
+          //   alt: metadata.title || 'Shared Image'
+          // }
+          "https://ipfs.io/ipfs/QmT42oqooiJB6R7atwpVw2L9mYDrEA7s645DRtY5q6s1ZY"
         ],
-        url: `${siteUrl}/share/${hash}`,
-        type: 'website'
+        // url: `${siteUrl}/share/${hash}`,
+        // type: 'website'
       },
-      twitter: {
-        card: 'summary_large_image',
-        title: metadata.title || 'Shared IPFS Image',
-        description: metadata.description || 'Shared content from IPFS',
-        images: [imageUrl]
-      },
-      other: {
-        'og:title': metadata.title || 'Shared IPFS Image',
-        'og:description': metadata.description || 'Shared content from IPFS',
-        'og:image': imageUrl,
-        'og:url': `${siteUrl}/share/${hash}`,
-        'twitter:card': 'summary_large_image',
-        'twitter:title': metadata.title || 'Shared IPFS Image',
-        'twitter:description': metadata.description || 'Shared content from IPFS',
-        'twitter:image': imageUrl
-      }
+      // twitter: {
+      //   card: 'summary_large_image',
+      //   title: metadata.title || 'Shared IPFS Image',
+      //   description: metadata.description || 'Shared content from IPFS',
+      //   images: [imageUrl]
+      // },
+      // other: {
+      //   'og:title': metadata.title || 'Shared IPFS Image',
+      //   'og:description': metadata.description || 'Shared content from IPFS',
+      //   'og:image': imageUrl,
+      //   'og:url': `${siteUrl}/share/${hash}`,
+      //   'twitter:card': 'summary_large_image',
+      //   'twitter:title': metadata.title || 'Shared IPFS Image',
+      //   'twitter:description': metadata.description || 'Shared content from IPFS',
+      //   'twitter:image': imageUrl
+      // }
     };
   } catch (error) {
     console.error("Error generating metadata:", error);
