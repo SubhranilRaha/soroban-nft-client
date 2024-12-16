@@ -28,7 +28,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           //   height: 300,
           //   alt: metadata.title || 'Shared Image'
           // }
-          "https://ipfs.io/ipfs/QmT42oqooiJB6R7atwpVw2L9mYDrEA7s645DRtY5q6s1ZY"
+          // "https://ipfs.io/ipfs/QmT42oqooiJB6R7atwpVw2L9mYDrEA7s645DRtY5q6s1ZY"
+          "/justimage.jpg"
         ],
         // url: `${siteUrl}/share/${hash}`,
         // type: 'website'
