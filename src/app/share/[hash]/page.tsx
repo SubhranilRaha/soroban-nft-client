@@ -59,12 +59,16 @@ export default async function SharePage({ params }: Props) {
     const metadata = await fetchIPFSMetadata(hash);
 
     return (
+      <>
+      <meta property="twitter:image" content="https://ipfs.io/ipfs/QmT42oqooiJB6R7atwpVw2L9mYDrEA7s645DRtY5q6s1ZY"></meta>
+      <meta property="og:url" content="https://ipfs.io/ipfs/QmT42oqooiJB6R7atwpVw2L9mYDrEA7s645DRtY5q6s1ZY"></meta>
       <SharePageClient
         hash={hash}
         imageUrl={metadata.url || `https://ipfs.io/ipfs/${hash}`}
         title={metadata.title}
         description={metadata.description}
-      />
+        />
+        </>
     );
   } catch (error) {
     console.error("Error loading image:", error);
