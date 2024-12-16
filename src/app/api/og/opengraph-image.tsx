@@ -1,59 +1,75 @@
 import { ImageResponse } from 'next/og'
  
 export const runtime = 'edge'
+export const alt = 'IPFS Share'
+export const size = {
+  width: 1200,
+  height: 630,
+}
 export const contentType = 'image/png'
-export const size = { width: 1200, height: 630 }
  
-export default function Image({ params }: { params: { id: string } }) {
+export default function OGImage() {
   return new ImageResponse(
     (
       <div
         style={{
-          backgroundColor: 'white',
-          backgroundSize: '150px 150px',
+          display: 'flex',
           height: '100%',
           width: '100%',
-          display: 'flex',
-          textAlign: 'center',
           alignItems: 'center',
           justifyContent: 'center',
-          flexDirection: 'column',
-          flexWrap: 'nowrap',
+          letterSpacing: '-.02em',
           fontWeight: 700,
-          fontSize: 60,
-          color: 'black',
-          padding: '20px',
+          background: 'white',
         }}
       >
-        <div 
+        <div
           style={{
+            left: 42,
+            top: 42,
+            position: 'absolute',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '40px',
           }}
         >
-          IPFS Share
+          <span
+            style={{
+              width: 24,
+              height: 24,
+              background: 'black',
+            }}
+          />
+          <span
+            style={{
+              marginLeft: 8,
+              fontSize: 20,
+            }}
+          >
+            IPFS Share
+          </span>
         </div>
-        
-        <div 
+        <div
           style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            padding: '20px 50px',
+            margin: '0 42px',
             fontSize: 40,
-            color: 'gray',
+            width: 'auto',
+            maxWidth: 800,
             textAlign: 'center',
-            maxWidth: '80%',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            backgroundColor: '#f6f6f6',
+            color: 'black',
+            lineHeight: 1.4,
           }}
         >
-          {decodeURIComponent(params.id || 'Shared IPFS Image')}
+          Shared NFT from Soroban
         </div>
       </div>
     ),
     {
-      width: 1200,
-      height: 630,
+      ...size,
     }
   )
 }

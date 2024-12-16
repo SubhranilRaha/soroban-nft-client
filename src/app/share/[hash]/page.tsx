@@ -1,15 +1,15 @@
-import { Metadata } from "next";
 import { fetchIPFSMetadata } from "@/lib/ipfs";
+import { Metadata } from "next";
 import SharePageClient from "../[hash]/SharePageClient";
 
 type Props = {
-  params: Promise<{hash: string}>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  params: Promise<{ hash: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 // export async function generateMetadata({ params }: Props): Promise<Metadata> {
 //   const hash = (await params).hash
-  
+
 //   try {
 //     const metadata = await fetchIPFSMetadata(hash);
 //     // const imageUrl = metadata.url || `https://ipfs.io/ipfs/${hash}`;
@@ -62,7 +62,7 @@ type Props = {
 
 // export async function generateMetadata({ params }: Props): Promise<Metadata> {
 //   const hash = (await params).hash
-  
+
 //   try {
 //     const metadata = await fetchIPFSMetadata(hash);
 
@@ -91,52 +91,53 @@ type Props = {
 // }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const hash = (await params).hash
-  
+  const hash = (await params).hash;
+
   try {
     const metadata = await fetchIPFSMetadata(hash);
 
     return {
-      title: metadata.title || 'Shared IPFS Image',
-      description: metadata.description || 'Shared content from IPFS',
+      title: metadata.title || "Shared IPFS Image",
+      description: metadata.description || "Shared content from IPFS",
       openGraph: {
-        title: metadata.title || 'Shared IPFS Image',
-        description: metadata.description || 'Shared content from IPFS',
+        title: metadata.title || "Shared IPFS Image",
+        description: metadata.description || "Shared content from IPFS",
         images: [
           {
-            url: `/api/og?title=${encodeURIComponent(metadata.title || 'Shared IPFS Image')}`,
-            type: 'image/png',
+            url: "/api/og",
             width: 1200,
             height: 630,
-          }
+          },
         ],
       },
       other: {
-        'og:image': '/api/og?title=' + encodeURIComponent(metadata.title || 'Shared IPFS Image'),
-        'og:image:type': 'image/png',
-        'og:image:width': '1200',
-        'og:image:height': '630'
-      }
+        "og:image":
+          "/api/og?title=" +
+          encodeURIComponent(metadata.title || "Shared IPFS Image"),
+        "og:image:type": "image/png",
+        "og:image:width": "1200",
+        "og:image:height": "630",
+      },
     };
   } catch (error) {
     console.error("Error generating metadata:", error);
     return {
-      title: 'Error Loading Image',
-      description: 'Unable to fetch image metadata'
+      title: "Error Loading Image",
+      description: "Unable to fetch image metadata",
     };
   }
 }
 
 export default async function SharePage({ params }: Props) {
-  const hash = (await params).hash
-  
+  const hash = (await params).hash;
+
   try {
     const metadata = await fetchIPFSMetadata(hash);
 
     return (
-      <SharePageClient 
-        hash={hash} 
-        imageUrl={metadata.url || `https://ipfs.io/ipfs/${hash}`} 
+      <SharePageClient
+        hash={hash}
+        imageUrl={metadata.url || `https://ipfs.io/ipfs/${hash}`}
         title={metadata.title}
         description={metadata.description}
       />
