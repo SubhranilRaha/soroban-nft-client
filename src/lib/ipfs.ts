@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
+import * as cheerio from 'cheerio';
 
 interface IPFSMetadataResult {
   url: string;
@@ -30,12 +31,18 @@ export async function fetchIPFSMetadata(hash: string): Promise<IPFSMetadataResul
         }
       });
 
-      console.log(response);
+      // Try to extract metadata from HTML content
+      const $ = cheerio.load(response.data);
+      const title = $('title').text() || $('meta[property="og:title"]').attr('content') || 'Shared IPFS Image';
+      const description = $('meta[name="description"]').attr('content') || 
+                          $('meta[property="og:description"]').attr('content') || 
+                          'Shared content from IPFS';
+
       return {
         url: url,
         hash: hash,
-        title: 'Shared IPFS Image', // Default title
-        description: 'Shared content from IPFS' // Default description
+        title: title,
+        description: description
       };
     } catch (error) {
       if (error instanceof AxiosError) {
