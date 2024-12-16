@@ -52,29 +52,81 @@ type Props = {
 //   }
 // }
 
+// export async function generateMetadata({ params }: Props): Promise<Metadata> {
+//   const hash = (await params).hash;
+
+//   // IMPORTANT: Add explicit error handling and logging
+//   if (!process.env.NEXT_PUBLIC_SITE_URL) {
+//     console.error("NEXT_PUBLIC_SITE_URL is not set");
+//     throw new Error("Site URL environment variable is missing");
+//   }
+
+//   try {
+//     const metadata = await fetchIPFSMetadata(hash);
+
+//     return {
+//       title: metadata.title || "Shared IPFS Image",
+//       description: metadata.description || "Shared content from IPFS",
+//       openGraph: {
+//         type: "website",
+//         url: `${process.env.NEXT_PUBLIC_SITE_URL}/share/${hash}`,
+//         title: metadata.title || "Shared IPFS Image",
+//         description: metadata.description || "Shared content from IPFS",
+//         images: [
+//           {
+//             url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/og?title=${encodeURIComponent(metadata.title || "Shared IPFS Image")}`,
+//             width: 1200,
+//             height: 630,
+//             alt: metadata.title || "Shared Image"
+//           }
+//         ],
+//       },
+//       twitter: {
+//         card: "summary_large_image",
+//         title: metadata.title || "Shared IPFS Image",
+//         description: metadata.description || "Shared content from IPFS",
+//         images: [`${process.env.NEXT_PUBLIC_SITE_URL}/api/og?title=${encodeURIComponent(metadata.title || "Shared IPFS Image")}`]
+//       },
+//     };
+//   } catch (error) {
+//     console.error("Metadata generation error:", error);
+//     return {
+//       title: "Error Loading Image",
+//       description: "Unable to fetch image metadata",
+//       openGraph: {
+//         type: "website",
+//         title: "Error Loading Image",
+//         description: "Unable to fetch image metadata",
+//         images: [
+//           {
+//             url: `${process.env.NEXT_PUBLIC_SITE_URL}/fallback-image.png`,
+//             width: 1200,
+//             height: 630,
+//           }
+//         ]
+//       }
+//     };
+//   }
+// }
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const hash = (await params).hash;
-
-  // IMPORTANT: Add explicit error handling and logging
-  if (!process.env.NEXT_PUBLIC_SITE_URL) {
-    console.error("NEXT_PUBLIC_SITE_URL is not set");
-    throw new Error("Site URL environment variable is missing");
-  }
 
   try {
     const metadata = await fetchIPFSMetadata(hash);
 
     return {
+      metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL!),
       title: metadata.title || "Shared IPFS Image",
       description: metadata.description || "Shared content from IPFS",
       openGraph: {
         type: "website",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL}/share/${hash}`,
+        url: `/share/${hash}`,
         title: metadata.title || "Shared IPFS Image",
         description: metadata.description || "Shared content from IPFS",
         images: [
           {
-            url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/og?title=${encodeURIComponent(metadata.title || "Shared IPFS Image")}`,
+            url: `/api/og?title=${encodeURIComponent(metadata.title || "Shared IPFS Image")}`,
             width: 1200,
             height: 630,
             alt: metadata.title || "Shared Image"
@@ -85,12 +137,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: "summary_large_image",
         title: metadata.title || "Shared IPFS Image",
         description: metadata.description || "Shared content from IPFS",
-        images: [`${process.env.NEXT_PUBLIC_SITE_URL}/api/og?title=${encodeURIComponent(metadata.title || "Shared IPFS Image")}`]
+        images: [`/api/og?title=${encodeURIComponent(metadata.title || "Shared IPFS Image")}`]
       },
     };
   } catch (error) {
     console.error("Metadata generation error:", error);
     return {
+      metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL!),
       title: "Error Loading Image",
       description: "Unable to fetch image metadata",
       openGraph: {
@@ -99,7 +152,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description: "Unable to fetch image metadata",
         images: [
           {
-            url: `${process.env.NEXT_PUBLIC_SITE_URL}/fallback-image.png`,
+            url: `/fallback-image.png`,
             width: 1200,
             height: 630,
           }

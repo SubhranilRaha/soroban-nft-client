@@ -30,8 +30,8 @@ export default function SharePageClient({
   const [isToastOpen, setIsToastOpen] = useState(false);
 
   const shareUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/share/${hash}` 
-    : `${process.env.NEXT_PUBLIC_SITE_URL}/share/${hash}`;
+  ? `${window.location.origin}/share/${hash}` 
+  : `${process.env.NEXT_PUBLIC_SITE_URL}/share/${hash}`;
 
   const handleCopyUrl = async () => {
     try {
