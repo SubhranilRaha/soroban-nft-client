@@ -31,7 +31,7 @@ export default function SharePageClient({
 
   const shareUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/share/${hash}` 
-    : `https://ipfs.io/ipfs/${hash}`;
+    : `${process.env.NEXT_PUBLIC_SITE_URL}/share/${hash}`;
 
   const handleCopyUrl = async () => {
     try {
@@ -50,7 +50,6 @@ export default function SharePageClient({
 
   return (
     <div className="container mx-auto p-4 relative">
-      
       <div className="flex flex-col items-center space-y-4">
         <h1 className="text-2xl font-bold">{title}</h1>
         {description && <p className="text-gray-600 mb-4">{description}</p>}
