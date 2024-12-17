@@ -10,8 +10,6 @@ interface IPFSMetadataResult {
 
 export async function fetchIPFSMetadata(hash: string): Promise<IPFSMetadataResult> {
   const gateways = [
-    'https://ipfs.io/ipfs/',
-    'https://cloudflare-ipfs.com/ipfs/',
     'https://gateway.pinata.cloud/ipfs/'
   ];
 
